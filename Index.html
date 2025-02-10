@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clima Agora 🌤️</title>
+    <style>
+        /* Resetando margens e paddings */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Corpo da página */
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to top, #FFB74D, #FF8A65, #D32F2F); /* Gradiente de pôr do sol */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container principal */
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+            color: #FF7043; /* Laranja suave */
+        }
+
+        input, button {
+            width: 85%;
+            padding: 18px;
+            border-radius: 12px;
+            border: none;
+            font-size: 18px;
+            margin: 10px 0;
+            transition: 0.3s;
+        }
+
+        input {
+            background-color: #FFF3E0;
+            color: #555;
+        }
+
+        button {
+            background-color: #FF7043;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background-color: #FF5722; /* Laranja escuro */
+            transform: translateY(-2px);
+        }
+
+        .dados-clima {
+            margin-top: 30px;
+            background: #FFEBEE;
+            padding: 25px;
+            border-radius: 10px;
+            display: none;
+            font-size: 18px;
+            color: #333;
+            text-align: left;
+        }
+
+        /* Botões de aumento de fonte */
+        .btn-aumento {
+            background-color: #FFB74D;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+            display: none; /* Inicialmente escondido */
+        }
+
+        .btn-aumento:hover {
+            background-color: #FF9800; /* Laranja mais escuro */
+        }
+
+        /* Botão de Compartilhamento */
+        #compartilhar {
+            background-color: #25D366;
+            color: white;
+            display: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        #compartilhar:hover {
+            background-color: #128C7E;
+        }
+
+        /* Créditos */
+        .creditos {
+            margin-top: 40px;
+            font-size: 16px;
+            color: #777;
+        }
+
+        .creditos a {
+            color: #FF7043;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .creditos a:hover {
+            text-decoration: underline;
+        }
+
+        /* Efeito responsivo */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                max-width: 100%;
+            }
+
+            h1 {
+                font-size: 36px;
+            }
+
+            input, button {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌎 Clima Agora</h1>
+    <input type="text" id="cidade" placeholder="Digite a cidade..." />
+    <button onclick="buscarClima()">🔍 Buscar Clima</button>
+    
+    <div id="clima" class="dados-clima"></div>
+    <div id="previsao" class="dados-clima"></div>
+    
+    <!-- Botões de Aumento de Fonte aparecem após a busca -->
+    <button class="btn-aumento" onclick="aumentarFonte()">🔠 Aumentar Fonte</button>
+    <button class="btn-aumento" onclick="diminuirFonte()">🔡 Diminuir Fonte</button>
+
+    <!-- Botão de Compartilhamento -->
+    <button id="compartilhar" onclick="compartilharWhatsApp()">📲 Compartilhar no WhatsApp</button>
+
+    <div class="creditos">
+        <p>Desenvolvido por <a href="https://www.instagram.com/joaoricardo.pe/" target="_blank">João Ricardo</a></p>
+    </div>
+</div>
+
+<script>
+    const API_KEY = "e022724c45e55c718926f110426778ff";
+    let tamanhoFonte = 18;
+
+    function buscarClima() {
+        const cidade = document.getElementById("cidade").value.trim();
+        if (!cidade) {
+            alert("Digite uma cidade!");
+            return;
+        }
+        obterDadosClima(`q=${cidade}`);
+    }
+
+    function obterDadosClima(param) {
+        fetch(`https://api.openweathermap.org/data/2.5/weather?${param}&appid=${API_KEY}&lang=pt_br&units=metric`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.cod !== 200) {
+                    alert("Cidade não encontrada!");
+                    return;
+                }
+
+                const { name, main, weather, wind, sys } = data;
+                const descricao = weather[0].description;
+                const temperatura = main.temp;
+                const sensacao = main.feels_like;
+                const umidade = main.humidity;
+                const vento = wind.speed;
+                const nascerSol = new Date(sys.sunrise * 1000).toLocaleTimeString("pt-BR");
+                const porSol = new Date(sys.sunset * 1000).toLocaleTimeString("pt-BR");
+
+                document.getElementById("clima").innerHTML = `
+                    <div class="bordered">
+                        <h2>${name}</h2>
+                        <p>🌡️ <b>Temperatura:</b> ${temperatura}°C</p>
+                        <p>🥶 <b>Sensação térmica:</b> ${sensacao}°C</p>
+                        <p>💨 <b>Vento:</b> ${vento} m/s</p>
+                        <p>💧 <b>Umidade:</b> ${umidade}%</p>
+                        <p>🌅 <b>Nascer do sol:</b> ${nascerSol}</p>
+                        <p>🌇 <b>Pôr do sol:</b> ${porSol}</p>
+                        <p>🌥️ <b>Condição:</b> ${descricao}</p>
+                    </div>
+                `;
+
+                alterarFundo(descricao);
+                buscarPrevisao(name);
+                document.getElementById("compartilhar").style.display = "inline-block"; // Exibe o botão de compartilhamento
+                document.querySelectorAll(".dados-clima").forEach(el => el.style.display = "block");
+                // Exibe os botões de aumento de fonte após a busca
+                document.querySelectorAll(".btn-aumento").forEach(btn => btn.style.display = "inline-block");
+            })
+            .catch(() => alert("Erro ao buscar os dados."));
+    }
+
+    function buscarPrevisao(cidade) {
+        fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${cidade}&appid=${API_KEY}&lang=pt_br&units=metric`)
+            .then(response => response.json())
+            .then(data => {
+                let previsaoHtml = "<h3>📅 Previsão para os próximos dias</h3>";
+
+                for (let i = 0; i < data.list.length; i += 8) {
+                    const item = data.list[i];
+                    const dataFormatada = new Date(item.dt * 1000).toLocaleDateString("pt-BR");
+                    const temp = item.main.temp;
+                    const descricao = item.weather[0].description;
+
+                    previsaoHtml += `<p>📅 ${dataFormatada} - 🌡️ ${temp}°C - ${descricao}</p>`;
+                }
+
+                document.getElementById("previsao").innerHTML = previsaoHtml;
+            })
+            .catch(() => alert("Erro ao buscar a previsão."));
+    }
+
+    function alterarFundo(descricao) {
+        if (descricao.includes("sol")) {
+            document.body.style.background = "linear-gradient(to top, #FFB74D, #FF8A65, #D32F2F)";
+        } else if (descricao.includes("nuvem")) {
+            document.body.style.background = "linear-gradient(to top, #FFB74D, #FFEB3B, #0288D1)";
+        } else if (descricao.includes("chuva")) {
+            document.body.style.background = "linear-gradient(to top, #0288D1, #0277BD, #01579B)";
+        } else {
+            document.body.style.background = "linear-gradient(to top, #FF8A65, #FF7043, #D32F2F)";
+        }
+    }
+
+    function compartilharWhatsApp() {
+        const clima = document.getElementById("clima").innerText;
+        const previsao = document.getElementById("previsao").innerText;
+        const mensagem = `🌎 Clima Atual\n\n${clima}\n\nPrevisão para os próximos dias:\n${previsao}\n\nVeja mais: https://meusite.com`;
+
+        const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+        window.open(urlWhatsApp, '_blank');
+    }
+
+    function aumentarFonte() {
+        tamanhoFonte += 2;
+        document.querySelectorAll('.dados-clima').forEach(el => el.style.fontSize = `${tamanhoFonte}px`);
+    }
+
+    function diminuirFonte() {
+        tamanhoFonte -= 2;
+        document.querySelectorAll('.dados-clima').forEach(el => el.style.fontSize = `${tamanhoFonte}px`);
+    }
+</script>
+
+</body>
+</html>
+  
