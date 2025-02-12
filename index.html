@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
@@ -143,6 +143,38 @@
             text-align: left;
         }
 
+        .noticia-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #FFB74D;
+        }
+
+        .noticia-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .noticia-titulo {
+            color: #D32F2F;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .noticia-descricao {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .noticia-link {
+            color: #FF7043;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .noticia-link:hover {
+            text-decoration: underline;
+        }
+
         .creditos {
             margin-top: 40px;
             font-size: 16px;
@@ -196,7 +228,7 @@
 
     <!-- Sessão de Notícias sobre o Clima -->
     <div id="noticias" class="noticias-clima">
-        <h3>📰 Notícias sobre o Clima</h3>
+        <h3>📰 Últimas Notícias sobre o Clima</h3>
         <div id="noticias-lista"></div>
     </div>
 
@@ -210,7 +242,7 @@
 
 <script>
     const API_KEY = "e022724c45e55c718926f110426778ff";
-    const NEWS_API_KEY = "acaa665626464ed3811ea01c6b67ff2c"; // Substitua pela sua chave da NewsAPI
+    const GNEWS_API_KEY = "77a3298da0ab9bb87d3cb9edd0c123f9"; // Sua chave da GNews
     let tamanhoFonte = 18;
 
     // Recuperar a última cidade pesquisada do localStorage
@@ -232,28 +264,31 @@
 
     // Função para buscar notícias sobre o clima
     function buscarNoticias() {
-        fetch(`https://newsapi.org/v2/everything?q=clima&language=pt&apiKey=${NEWS_API_KEY}`)
+        fetch(`https://gnews.io/api/v4/search?q=clima&lang=pt&max=3&apikey=${GNEWS_API_KEY}`)
             .then(response => response.json())
             .then(data => {
                 const noticiasLista = document.getElementById("noticias-lista");
                 noticiasLista.innerHTML = "";
 
                 if (data.articles && data.articles.length > 0) {
-                    data.articles.slice(0, 5).forEach(article => {
+                    data.articles.slice(0, 3).forEach(article => {
                         noticiasLista.innerHTML += `
-                            <div class="noticia">
-                                <h4><a href="${article.url}" target="_blank">${article.title}</a></h4>
-                                <p>${article.description}</p>
+                            <div class="noticia-item">
+                                <a href="${article.url}" class="noticia-link" target="_blank">
+                                    <h4 class="noticia-titulo">${article.title}</h4>
+                                </a>
+                                <p class="noticia-descricao">${article.description || 'Descrição não disponível'}</p>
+                                <small>Fonte: ${article.source.name}</small>
                             </div>
                         `;
                     });
                     document.getElementById("noticias").style.display = "block";
                 } else {
-                    noticiasLista.innerHTML = "<p>Nenhuma notícia encontrada.</p>";
+                    noticiasLista.innerHTML = "<p>Nenhuma notícia recente encontrada.</p>";
                 }
             })
             .catch(() => {
-                document.getElementById("noticias-lista").innerHTML = "<p>Erro ao carregar notícias.</p>";
+                document.getElementById("noticias-lista").innerHTML = "<p>Não foi possível carregar as notícias no momento.</p>";
             });
     }
 
@@ -372,12 +407,7 @@
       navigator.serviceWorker.register('/service-worker.js')
         .then(registration => {
           console.log('ServiceWorker registrado com sucesso: ', registration.scope);
-        })
-        .catch(err => {
-          console.log('Falha ao registrar o ServiceWorker: ', err);
-        });
-    });
-  }
+    }
 </script>
 
 </body>
