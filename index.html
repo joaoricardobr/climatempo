@@ -116,6 +116,33 @@
             background-color: #128C7E;
         }
 
+        #instalar {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-block; /* Sempre visível */
+        }
+
+        #instalar:hover {
+            background-color: #0056b3;
+        }
+
+        .noticias-clima {
+            margin-top: 30px;
+            background: #FFEBEE;
+            padding: 25px;
+            border-radius: 10px;
+            display: none;
+            font-size: 18px;
+            color: #333;
+            text-align: left;
+        }
+
         .creditos {
             margin-top: 40px;
             font-size: 16px;
@@ -161,7 +188,19 @@
     <button class="btn-aumento" onclick="aumentarFonte()">🔠 Aumentar Fonte</button>
     <button class="btn-aumento" onclick="diminuirFonte()">🔡 Diminuir Fonte</button>
 
+    <!-- Botão de Instalação -->
+    <button id="instalar" onclick="instalarApp()">📱 Instalar App</button>
+
+    <!-- Botão de Compartilhamento -->
     <button id="compartilhar" onclick="compartilharWhatsApp()">📲 Compartilhar no WhatsApp</button>
+
+    <!-- Sessão de Notícias sobre o Clima -->
+    <div id="noticias" class="noticias-clima">
+        <h3>📰 Notícias sobre o Clima</h3>
+        <div id="noticias-lista"></div>
+    </div>
+
+    <!-- Botão de Página Inicial -->
     <button onclick="window.location.href='https://joaoricardobr.github.io/climatempo/'" style="background-color: #007bff; color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-size: 18px;">🏠 Página Inicial</button>
 
     <div class="creditos">
@@ -171,6 +210,7 @@
 
 <script>
     const API_KEY = "e022724c45e55c718926f110426778ff";
+    const NEWS_API_KEY = "acaa665626464ed3811ea01c6b67ff2c"; // Substitua pela sua chave da NewsAPI
     let tamanhoFonte = 18;
 
     // Recuperar a última cidade pesquisada do localStorage
@@ -180,6 +220,45 @@
         cidadeInput.value = ultimaCidade;
         buscarClima(); // Busca automaticamente o clima da última cidade
     }
+
+    // Função para instalar o PWA
+    function instalarApp() {
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            alert("O aplicativo já está instalado.");
+        } else {
+            alert("Use o menu do navegador para adicionar este site à sua tela inicial.");
+        }
+    }
+
+    // Função para buscar notícias sobre o clima
+    function buscarNoticias() {
+        fetch(`https://newsapi.org/v2/everything?q=clima&language=pt&apiKey=${NEWS_API_KEY}`)
+            .then(response => response.json())
+            .then(data => {
+                const noticiasLista = document.getElementById("noticias-lista");
+                noticiasLista.innerHTML = "";
+
+                if (data.articles && data.articles.length > 0) {
+                    data.articles.slice(0, 5).forEach(article => {
+                        noticiasLista.innerHTML += `
+                            <div class="noticia">
+                                <h4><a href="${article.url}" target="_blank">${article.title}</a></h4>
+                                <p>${article.description}</p>
+                            </div>
+                        `;
+                    });
+                    document.getElementById("noticias").style.display = "block";
+                } else {
+                    noticiasLista.innerHTML = "<p>Nenhuma notícia encontrada.</p>";
+                }
+            })
+            .catch(() => {
+                document.getElementById("noticias-lista").innerHTML = "<p>Erro ao carregar notícias.</p>";
+            });
+    }
+
+    // Buscar notícias ao carregar a página
+    buscarNoticias();
 
     function buscarClima() {
         const cidade = cidadeInput.value.trim();
