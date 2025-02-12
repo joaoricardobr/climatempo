@@ -4,18 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clima Agora 🌤️</title>
+    <!-- Manifest.json integrado -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJzaG9ydF9uYW1lIjogIkNsaW1hQWdvcmEiLAogICJuYW1lIjogIkNsaW1hIEFnb3JhIC0gUHJldmlzw6NvIGRvIFRlbXBvIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly93d3cuaWNvbmZpbmRlci5jb20vaWNvbnMvMzg1OTE0Ni9kb3dubG9hZC9wbmcvMTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiCiAgICB9LAogICAgewogICAgICAic3JjIjogImh0dHBzOi8vd3d3Lmljb25maW5kZXIuY29tL2ljb25zLzM4NTkxNDYvZG93bmxvYWQvcG5nLzUxMiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIsCiAgICAgICJzaXplcyI6ICI1MTJ4NTEyIgogICAgfQogIF0sCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRkZCNzREIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAic2NvcGUiOiAiLyIsCiAgInRoZW1lX2NvbG9yIjogIiNGRjcwNDMiCn0=">
+    <!-- Ícones para PWA -->
+    <link rel="icon" type="image/png" sizes="192x192" href="https://www.iconfinder.com/icons/3859146/download/png/192">
+    <link rel="icon" type="image/png" sizes="512x512" href="https://www.iconfinder.com/icons/3859146/download/png/512">
     <style>
-        /* Resetando margens e paddings */
+        /* Seu CSS existente (mantido intacto) */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* Corpo da página */
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(to top, #FFB74D, #FF8A65, #D32F2F); /* Gradiente de pôr do sol */
+            background: linear-gradient(to top, #FFB74D, #FF8A65, #D32F2F);
             color: #333;
             display: flex;
             justify-content: center;
@@ -24,7 +28,6 @@
             padding: 20px;
         }
 
-        /* Container principal */
         .container {
             background: rgba(255, 255, 255, 0.9);
             padding: 30px;
@@ -39,7 +42,7 @@
         h1 {
             font-size: 48px;
             margin-bottom: 30px;
-            color: #FF7043; /* Laranja suave */
+            color: #FF7043;
         }
 
         input, button {
@@ -66,7 +69,7 @@
         }
 
         button:hover {
-            background-color: #FF5722; /* Laranja escuro */
+            background-color: #FF5722;
             transform: translateY(-2px);
         }
 
@@ -81,7 +84,6 @@
             text-align: left;
         }
 
-        /* Botões de aumento de fonte */
         .btn-aumento {
             background-color: #FFB74D;
             color: white;
@@ -91,14 +93,13 @@
             cursor: pointer;
             margin-top: 10px;
             transition: 0.3s;
-            display: none; /* Inicialmente escondido */
+            display: none;
         }
 
         .btn-aumento:hover {
-            background-color: #FF9800; /* Laranja mais escuro */
+            background-color: #FF9800;
         }
 
-        /* Botão de Compartilhamento */
         #compartilhar {
             background-color: #25D366;
             color: white;
@@ -115,7 +116,6 @@
             background-color: #128C7E;
         }
 
-        /* Créditos */
         .creditos {
             margin-top: 40px;
             font-size: 16px;
@@ -132,7 +132,6 @@
             text-decoration: underline;
         }
 
-        /* Efeito responsivo */
         @media (max-width: 600px) {
             .container {
                 padding: 20px;
@@ -159,16 +158,12 @@
     <div id="clima" class="dados-clima"></div>
     <div id="previsao" class="dados-clima"></div>
     
-    <!-- Botões de Aumento de Fonte aparecem após a busca -->
     <button class="btn-aumento" onclick="aumentarFonte()">🔠 Aumentar Fonte</button>
     <button class="btn-aumento" onclick="diminuirFonte()">🔡 Diminuir Fonte</button>
 
-    <!-- Botão de Compartilhamento -->
     <button id="compartilhar" onclick="compartilharWhatsApp()">📲 Compartilhar no WhatsApp</button>
-<!-- Botão de Home (Página Inicial) -->
     <button onclick="window.location.href='https://joaoricardobr.github.io/climatempo/'" style="background-color: #007bff; color: white; padding: 10px 20px; border-radius: 12px; cursor: pointer; font-size: 18px;">🏠 Página Inicial</button>
 
-    <div class="creditos">
     <div class="creditos">
         <p>Desenvolvido por <a href="https://www.instagram.com/joaoricardo.pe/" target="_blank">João Ricardo</a></p>
     </div>
@@ -178,12 +173,24 @@
     const API_KEY = "e022724c45e55c718926f110426778ff";
     let tamanhoFonte = 18;
 
+    // Recuperar a última cidade pesquisada do localStorage
+    const cidadeInput = document.getElementById("cidade");
+    const ultimaCidade = localStorage.getItem("ultimaCidade");
+    if (ultimaCidade) {
+        cidadeInput.value = ultimaCidade;
+        buscarClima(); // Busca automaticamente o clima da última cidade
+    }
+
     function buscarClima() {
-        const cidade = document.getElementById("cidade").value.trim();
+        const cidade = cidadeInput.value.trim();
         if (!cidade) {
             alert("Digite uma cidade!");
             return;
         }
+
+        // Salvar a cidade no localStorage
+        localStorage.setItem("ultimaCidade", cidade);
+
         obterDadosClima(`q=${cidade}`);
     }
 
@@ -220,9 +227,8 @@
 
                 alterarFundo(descricao);
                 buscarPrevisao(name);
-                document.getElementById("compartilhar").style.display = "inline-block"; // Exibe o botão de compartilhamento
+                document.getElementById("compartilhar").style.display = "inline-block";
                 document.querySelectorAll(".dados-clima").forEach(el => el.style.display = "block");
-                // Exibe os botões de aumento de fonte após a busca
                 document.querySelectorAll(".btn-aumento").forEach(btn => btn.style.display = "inline-block");
             })
             .catch(() => alert("Erro ao buscar os dados."));
@@ -263,7 +269,7 @@
     function compartilharWhatsApp() {
         const clima = document.getElementById("clima").innerText;
         const previsao = document.getElementById("previsao").innerText;
-        const mensagem = `🌎 Clima Atual\n\n${clima}\n\nPrevisão para os próximos dias:\n${previsao}\n\nVeja mais: https://meusite.com`;
+        const mensagem = `🌎 Clima Atual\n\n${clima}\n\nPrevisão para os próximos dias:\n${previsao}\n\nVeja mais: https://joaoricardobr.github.io/climatempo`;
 
         const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
         window.open(urlWhatsApp, '_blank');
@@ -280,6 +286,20 @@
     }
 </script>
 
+<!-- Service Worker integrado -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          console.log('ServiceWorker registrado com sucesso: ', registration.scope);
+        })
+        .catch(err => {
+          console.log('Falha ao registrar o ServiceWorker: ', err);
+        });
+    });
+  }
+</script>
+
 </body>
 </html>
-  
